@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const axios = require('axios');
+require('dotenv');
 
 const addDate = (date) => {
     date = date.split('T').shift();
@@ -31,7 +32,7 @@ app.use(bodyParser({limit: '50mb'}));
 app.post('/analytics', async (req, res) => {
     let config = {
         headers: {
-          Authorization: 'Bearer eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiZGlyIn0..OsphBezwr_xQTYg4_OsTMA.wW-i2AJAeA-LkrHZ2_eR8aBWnojhBBujJ7HXdNy40HUkmq8nli-bJ8qNreIjxi-fC3tM4QlzzDaPcIJ-hX8Hb6JTA8znt4gHsy5NvX3ge1kx6C4mMbp-trDnHo_x6rzMcIKDFXb7EKGrX9kMBl-DfMTfyEU8it1MGnFOEI-VQjOQfJb4iQ6rcTFuOeN1UF4plfD8E6u7sJt7dmK9qoECebWjg1KNsk69KK3548nnL_iK03KiH5aosD9oV9iqp0zAI0xL-kGNxQXN57UU3e9To3nHDBzOM1ZEAyogVbLGOkvJG1TBlj9m3-n-rekAGD59faztMLdnme4ZY1VS9Cyxmd-T7-WWO7trSvytt895z_eekGTWy4NSY8HQnuiBWGz9dniwMuiJ4xlAbi5a_Yp5zd1EFtiCj9M0rojInaos1ZYoZqawA-bCgD8njCYjglJzGa7G9TgLIzcFX7hBjiWAlt83Nzhx9bbcsPqOtPZVybMRVEdN_pDshBGw8GcdkjgakDCTjZVJ9qyvWGGov1eG7OJlh4yQGD7wqwOYpejOlSfaZqNVZiJJYYopa5uBxAmnZSTbZCX_cW7c9vrzlOR68Jwu1hUCYysEJVn0G17nClXp-fFtERCBgywPTIlEjJV8zO5N0YYzDQBTOH2959UZmKBRsVCE61IQ-KJKcgcl1Bvm4IErWKp-oyMSc9_j0ZOW.eJQJkY-omtbHA0rDsk-0og',
+          Authorization: 'Bearer ' + PROCESS.ENV.TOKEN,
           Connection: 'keep-alive',
           Accept: 'application/json',
           Host: 'quickbooks.api.intuit.com'
@@ -87,9 +88,9 @@ app.post('/analytics', async (req, res) => {
         ws.cell(i+2, 4)
         .string(removeTime(customers[i].MetaData.LastUpdatedTime));
 
-        const invoice = await axios.get(`https://quickbooks.api.intuit.com/v3/company/54631632/reports/TransactionList?customer=${customers[i].Id}&start_date=1900-01-01&end_date=9999-01-01&arpaid=All`, config);
+        const invoice = await axios.get(`https://quickbooks.api.intuit.com/v3/company/${PROCESS.ENV.REALMID}/reports/TransactionList?customer=${customers[i].Id}&start_date=1900-01-01&end_date=9999-01-01&arpaid=All`, config);
         const Row = invoice.data.Rows.Row;
-        console.log(customers[i].FullyQualifiedName, Row);
+        
         if(Row) {
             for(let j = 0; j < Row.length; j++) {
                 if(Row[j].ColData[1].value === 'Invoice' || Row[j].ColData[1].value === 'Payment') {
